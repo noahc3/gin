@@ -16,4 +16,8 @@ export WINELOADER="$RUNNER/bin/wine"
 export WINEDLLPATH="$RUNNER/lib/wine"
 export WINEPREFIX="$PREFIX"
 
+echo "Using runner: $(basename "$RUNNER")"
+echo "Using prefix: $(basename "$PREFIX")"
+echo "Executing: $cmd"
+
 "$@"
