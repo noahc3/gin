@@ -125,8 +125,8 @@ if [[ "$1" == "runner" ]]; then
     if [[ "$1" == "install" ]]; then
         shift
 
-        if [[ "$2" == "--set" ]]; then
-            set_runner "$2"
+        if [[ "$1" == "--set" ]]; then
+            set_runner "$1"
             shift
         fi
 
@@ -148,12 +148,15 @@ if [[ "$1" == "runner" ]]; then
     # install additional tools or scripts into the runner
     if [[ "$1" == "plonk" ]]; then
         assert_valid_runner_set
+
         if [ $? -ne 0 ]; then
             echo "No valid runner set. Cannot plonk."
             exit 1
         fi
+
+        shift
         
-        case "$2" in
+        case "$1" in
             # gincfg runner plonk winetricks
             # install winetricks into the current runner
             "winetricks")
@@ -165,7 +168,7 @@ if [[ "$1" == "runner" ]]; then
                 echo "    winetricks    Install winetricks into the current runner"
                 ;;
             *)
-                echo "Unknown plonk: $2"
+                echo "Unknown plonk: $1"
                 echo "Use 'gincfg runner plonk help' for a list of plonks."
                 exit 1
                 ;;
@@ -184,15 +187,16 @@ if [[ "$1" == "prefix" ]]; then
     # gincfg prefix set <prefix_name>
     # set the current prefix
     if [[ "$1" == "set" ]]; then
-        if [ -z "$2" ]; then
+        shift
+        if [ -z "$1" ]; then
             echo "Usage: gincfg prefix set <prefix_name>"
             exit 1
         fi
 
-        if [ -d "$GIN_PREFIXES/$2" ]; then
-            setcfg prefix "$2"
+        if [ -d "$GIN_PREFIXES/$1" ]; then
+            setcfg prefix "$1"
         else
-            echo "Prefix '$2' does not exist."
+            echo "Prefix '$1' does not exist."
             exit 1
         fi
 
@@ -211,9 +215,10 @@ if [[ "$1" == "prefix" ]]; then
     # --no-mono will skip installing mono into the new prefix
     # --set will automatically set the newly created prefix as current
     if [[ "$1" == "create" ]]; then
-        shift
         assert_valid_runner_set
         
+        shift
+
         local skip_mono=""
         local set_prefix=""
         
@@ -260,8 +265,6 @@ if [[ "$1" == "prefix" ]]; then
     # gincfg prefix plonk <plonk_name> [args...]
     # install additional tools or scripts into the prefix
     if [[ "$1" == "plonk" ]]; then
-        shift
-
         assert_valid_runner_set
         if [ $? -ne 0 ]; then
             echo "No valid runner set. Cannot plonk."
@@ -273,6 +276,8 @@ if [[ "$1" == "prefix" ]]; then
             echo "No valid prefix set. Cannot plonk."
             exit 1
         fi
+
+        shift
 
         local prefix_path="$(get_prefix_path)"
         
@@ -291,7 +296,7 @@ if [[ "$1" == "prefix" ]]; then
                 echo "    dotnet10sdk    Install .NET 10 SDK into the current prefix"
                 ;;
             *)
-                echo "Unknown plonk: $2"
+                echo "Unknown plonk: $1"
                 echo "Use 'gincfg prefix plonk help' for a list of plonks."
                 exit 1
                 ;;
