@@ -259,6 +259,8 @@ if [[ "$1" == "prefix" ]]; then
         if [[ -n "$set_prefix" ]]; then
             setcfg prefix "$prefix_name"
         fi
+
+        exit 0
     fi
 
     # gincfg prefix plonk <plonk_name> [args...]
