@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+GIN_MIGRATION_LEVEL="0"
 GIN_TARGET_MIGRATION_LEVEL=1
 
 export GIN_PATH=$(readlink -f "$(dirname "$(readlink -f "$0")")/..")
@@ -44,7 +45,9 @@ function set_migration_level() {
     GIN_MIGRATION_LEVEL="$1"
 }
 
-if [ "$(get_migration_level)" -lt "$GIN_TARGET_MIGRATION_LEVEL" ]; then
+GIN_MIGRATION_LEVEL="$(get_migration_level)"
+
+if [ "$GIN_MIGRATION_LEVEL" -lt "$GIN_TARGET_MIGRATION_LEVEL" ]; then
     if [ "$GIN_MIGRATION_LEVEL" == "0" ]; then
         mkdir -p "$GIN_CONFIG"
         mkdir -p "$GIN_RUNNERS"
@@ -53,6 +56,8 @@ if [ "$(get_migration_level)" -lt "$GIN_TARGET_MIGRATION_LEVEL" ]; then
         
         set_migration_level 1
     fi
+
+    echo "Migration complete. Current migration level: $GIN_MIGRATION_LEVEL"
 fi
 
 export PATH="$GIN_BIN:$PATH"
