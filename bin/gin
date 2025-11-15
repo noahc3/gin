@@ -16,6 +16,18 @@ export WINELOADER="$RUNNER/bin/wine"
 export WINEDLLPATH="$RUNNER/lib/wine"
 export WINEPREFIX="$PREFIX"
 
+if [ -n "$GIN_DEBUG" ]; then
+    echo "Runner Path: $RUNNER"
+    echo "Prefix Path: $PREFIX"
+    echo "WINEPREFIX: $WINEPREFIX"
+    echo "WINEDLLPATH: $WINEDLLPATH"
+    echo "WINESERVER: $WINESERVER"
+    echo "WINELOADER: $WINELOADER"
+    echo "LD_LIBRARY_PATH: $LD_LIBRARY_PATH"
+    echo "PATH: $PATH"
+    echo "WINEDLLOVERRIDES: $WINEDLLOVERRIDES"
+fi
+
 echo "Using runner: $(basename "$RUNNER")"
 echo "Using prefix: $(basename "$PREFIX")"
 echo "Executing: $cmd"
