@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+cmd="$@"
+source "$(dirname "$(readlink -f "$0")")/ginenv"
+
+assert_valid_runner_set
+assert_valid_prefix_set
+
+local RUNNER="$(get_runner_path)"
+local PREFIX="$(get_prefix_path)"
+
+export PATH="$RUNNER/bin:$PATH"
+export LD_LIBRARY_PATH="$RUNNER/lib:$LD_LIBRARY_PATH"
+export WINEDLLOVERRIDES="winemenubuilder.exe=d;${WINEDLLOVERRIDES}"
+export WINESERVER="$RUNNER/bin/wineserver"
+export WINELOADER="$RUNNER/bin/wine"
+export WINEDLLPATH="$RUNNER/lib/wine"
+export WINEPREFIX="$PREFIX"
+
+"$@"

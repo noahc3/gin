@@ -1,0 +1,325 @@
+#!/usr/bin/env bash
+source "$(dirname "$(readlink -f "$0")")/ginenv"
+
+function set_runner() {
+    if runner_exists "$1"; then
+        setcfg runner "$1"
+    else
+        echo "Runner '$1' does not exist."
+        exit 1
+    fi
+}
+
+function install_runner() {
+    local runner_name=$1
+    local runner_url=$2
+    local download_name=$(echo $runner_url | awk -F"/" '{print $NF}')
+
+    mkdir -p "$WINE_DIR/runners"
+
+    pushd "$WINE_DIR/runners"
+
+    wget $runner_url
+
+    local orig_name=$(tar -tf ${download_name} | head -1 | cut -f1 -d"/")
+    
+    if [[ $download_name == *.tar.gz ]]; then
+        tar -xzf ${download_name}
+    elif [[ $download_name == *.tar.xz ]]; then
+        tar -xJf ${download_name}
+    elif [[ $download_name == *.zip ]]; then
+        unzip ${download_name}
+    fi
+    
+    mv ${orig_name} ${runner_name}
+    
+    popd
+}
+
+if [[ "$1" == "meta" ]]; then
+    shift
+
+    # gincfg meta link
+    # link bin/gin* binaries to /usr/local/bin
+    if [[ "$1" == "link" ]]; then
+        for bin in "$GIN_BIN"/gin*; do
+            local bin_name=$(basename "$bin")
+            ln -sf "$bin" "/usr/local/bin/$bin_name"
+        done
+        exit 0
+    fi
+
+    # gincfg meta unlink
+    # remove gin binaries from /usr/local/bin
+    if [[ "$1" == "unlink" ]]; then
+        for bin in "$GIN_BIN"/*; do
+            local bin_name=$(basename "$bin")
+            rm -f "/usr/local/bin/$bin_name"
+        done
+        exit 0
+    fi
+
+    # gincfg meta link-extra
+    # link additional gin wrappers to /usr/local/bin
+    if [[ "$1" == "link-extra" ]]; then
+        for bin in "$GIN_BIN"/wine*; do
+            local bin_name=$(basename "$bin")
+            ln -sf "$bin" "/usr/local/bin/$bin_name"
+        done
+        exit 0
+    fi
+
+    # gincfg meta unlink-extra
+    # remove additional gin wrappers from /usr/local/bin
+    if [[ "$1" == "unlink-extra" ]]; then
+        for bin in "$GIN_BIN"/wine*; do
+            local bin_name=$(basename "$bin")
+            rm -f "/usr/local/bin/$bin_name"
+        done
+        exit 0
+    fi
+
+
+    if [[ "$1" == "help" ]]; then
+        echo "gincfg meta link"
+        echo "    Link gin binaries to /usr/local/bin"
+        echo "gincfg meta unlink"
+        echo "    Remove gin binaries from /usr/local/bin"
+        echo "gincfg meta link-extra"
+        echo "    Link additional gin wrappers (wine, winecfg, winetricks) to /usr/local/bin"
+        echo "gincfg meta unlink-extra"
+        echo "    Remove additional gin wrappers from /usr/local/bin"
+        exit 0
+    fi
+
+    echo "Unknown gincfg meta command: $1"
+    echo "Use 'gincfg meta help' for a list of commands."
+    exit 1
+fi
+
+if [[ "$1" == "runner" ]]; then
+    shift
+
+    # gincfg runner set <runner_name>
+    # set the current runner
+    if [[ "$1" == "set" ]]; then
+        if [ -z "$2" ]; then
+            echo "Usage: gincfg runner set <runner_name>"
+            exit 1
+        fi
+
+        set_runner "$2"
+        exit 0
+    fi
+
+    # gincfg runner list
+    # list all available runners
+    if [[ "$1" == "list" ]]; then
+        ls "$GIN_RUNNERS"
+        exit 0
+    fi
+
+    # gincfg runner install [--set] <runner_name> <runner_url>
+    # install a new runner
+    # must be a link to a tar.gz, tar.xz, or zip file containing the prebuilt runner binaries
+    if [[ "$1" == "install" ]]; then
+        if [ -z "$2" ] || [ -z "$3" ]; then
+            echo "Usage: gincfg runner install [--set] <runner_name> <runner_url>"
+            exit 1
+        fi
+
+        install_runner "$2" "$3"
+        if [[ "$4" == "--set" ]]; then
+            set_runner "$2"
+        fi
+
+        exit 0
+    fi
+
+    # gincfg runner plonk
+    # install additional tools or scripts into the runner
+    if [[ "$1" == "plonk" ]]; then
+        assert_valid_runner_set
+        if [ $? -ne 0 ]; then
+            echo "No valid runner set. Cannot plonk."
+            exit 1
+        fi
+        
+        case "$2" in
+            # gincfg runner plonk winetricks
+            # install winetricks into the current runner
+            "winetricks")
+                wget "https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks" -O "$runner_path/bin/winetricks"
+                chmod +x "$runner_path/bin/winetricks"
+                ;;
+            "help" | "list" | "")
+                echo "Available plonks:"
+                echo "    winetricks    Install winetricks into the current runner"
+                ;;
+            *)
+                echo "Unknown plonk: $2"
+                echo "Use 'gincfg runner plonk help' for a list of plonks."
+                exit 1
+                ;;
+        esac
+
+        exit 0
+    fi
+
+    echo "Unknown gincfg runner command: $1"
+    exit 1
+fi
+
+if [[ "$1" == "prefix" ]]; then
+    shift
+
+    # gincfg prefix set <prefix_name>
+    # set the current prefix
+    if [[ "$1" == "set" ]]; then
+        if [ -z "$2" ]; then
+            echo "Usage: gincfg prefix set <prefix_name>"
+            exit 1
+        fi
+
+        if [ -d "$GIN_PREFIXES/$2" ]; then
+            setcfg prefix "$2"
+        else
+            echo "Prefix '$2' does not exist."
+            exit 1
+        fi
+
+        exit 0
+    fi
+
+    # gincfg prefix list
+    # list all available prefixes
+    if [[ "$1" == "list" ]]; then
+        ls "$GIN_PREFIXES"
+        exit 0
+    fi
+
+    # gincfg prefix create [--no-mono] [--set] <prefix_name>
+    # create a new prefix
+    # --no-mono will skip installing mono into the new prefix
+    # --set will automatically set the newly created prefix as current
+    if [[ "$1" == "create" ]]; then
+        shift
+        assert_valid_runner_set
+        
+        local skip_mono=""
+        local set_prefix=""
+        
+        while [[ $1 == --* ]]; do
+            case "$1" in
+                "--no-mono")
+                    skip_mono="--no-mono"
+                    shift
+                    ;;
+                "--set")
+                    set_prefix="yes"
+                    shift
+                    ;;
+                *)
+                    echo "Unknown option: $1"
+                    exit 1
+                    ;;
+            esac
+        done
+
+        if [ -z "$1" ]; then
+            echo "Usage: gincfg prefix create [--no-mono] [--set] <prefix_name>"
+            exit 1
+        fi
+
+        local prefix_name="$1"
+        local runner_path="$(get_runner_path)"
+
+        mkdir -p "$GIN_PREFIXES/$prefix_name"
+        export WINEPREFIX="$GIN_PREFIXES/$prefix_name"
+        export GIN_OVERRIDES="no_prefix_check;${GIN_OVERRIDES}"
+
+        if [[ -n "$skip_mono" ]]; then
+            echo "Y" | WINEDLLOVERRIDES="mscoree=d;${WINEDLLOVERRIDES}" gin wineboot --init
+        else
+            echo "Y" | gin wineboot --init
+        fi
+        
+        if [[ -n "$set_prefix" ]]; then
+            setcfg prefix "$prefix_name"
+        fi
+    fi
+
+    # gincfg prefix plonk <plonk_name> [args...]
+    # install additional tools or scripts into the prefix
+    if [[ "$1" == "plonk" ]]; then
+        shift
+
+        assert_valid_runner_set
+        if [ $? -ne 0 ]; then
+            echo "No valid runner set. Cannot plonk."
+            exit 1
+        fi
+
+        assert_valid_prefix_set
+        if [ $? -ne 0 ]; then
+            echo "No valid prefix set. Cannot plonk."
+            exit 1
+        fi
+
+        local prefix_path="$(get_prefix_path)"
+        
+        case "$1" in
+            # gincfg prefix plonk dotnet10sdk
+            # install .NET 10 SDK into the current prefix
+            "dotnet10sdk")
+                pushd "$GIN_STAGING"
+                wget "https://builds.dotnet.microsoft.com/dotnet/Sdk/10.0.100/dotnet-sdk-10.0.100-win-x64.exe"
+                gin wine dotnet-sdk-10.0.100-win-x64.exe /install /quiet /norestart
+                rm dotnet-sdk-10.0.100-win-x64.exe
+                popd
+                ;;
+            "help" | "list" | "")
+                echo "Available plonks:"
+                echo "    dotnet10sdk    Install .NET 10 SDK into the current prefix"
+                ;;
+            *)
+                echo "Unknown plonk: $2"
+                echo "Use 'gincfg prefix plonk help' for a list of plonks."
+                exit 1
+                ;;
+        esac
+
+        exit 0
+    fi
+
+    if [[ "$1" == "help" ]]; then
+        echo "gincfg prefix set <prefix_name>"
+        echo "    Set the current prefix"
+        echo "gincfg prefix list"
+        echo "    List all available prefixes"
+        echo "gincfg prefix create [--no-mono] [--set] <prefix_name>"
+        echo "    Create a new prefix"
+        echo "    --no-mono will skip installing mono into the new prefix"
+        echo "    --set will automatically set the newly created prefix as current"
+        echo "gincfg prefix plonk <plonk_name> [args...]"
+        echo "    Install additional tools or scripts into the prefix"
+        exit 0
+    fi
+
+    echo "Unknown gincfg prefix command: $1"
+    echo "Use 'gincfg prefix help' for a list of commands."
+    exit 1
+fi
+
+if [[ "$1" == "help" ]]; then
+    echo "gincfg runner <command>        Manage Wine runners"
+    echo "gincfg prefix <command>        Manage Wine prefixes"
+    echo "gincfg meta <command>          Meta commands for gin"
+    echo "gincfg help                   Show this help message"
+    echo
+    echo "Use 'gincfg <option> help' for more information on a particular option."
+    exit 0
+fi
+
+echo "Unknown gincfg command: $1"
+exit 1
