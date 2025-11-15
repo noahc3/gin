@@ -2,12 +2,12 @@
 
 GIN_TARGET_MIGRATION_LEVEL=1
 
-GIN_PATH=$(readlink -f "$(dirname "$(readlink -f "$0")")/..")
-GIN_BIN="$GIN_PATH/bin"
-GIN_STAGING="$GIN_PATH/staging"
-GIN_CONFIG="$GIN_PATH/config"
-GIN_RUNNERS="$GIN_PATH/runners"
-GIN_PREFIXES="$GIN_PATH/prefixes"
+export GIN_PATH=$(readlink -f "$(dirname "$(readlink -f "$0")")/..")
+export GIN_BIN="$GIN_PATH/bin"
+export GIN_STAGING="$GIN_PATH/staging"
+export GIN_CONFIG="$GIN_PATH/config"
+export GIN_RUNNERS="$GIN_PATH/runners"
+export GIN_PREFIXES="$GIN_PATH/prefixes"
 
 function getcfg() {
     if [ ! -f "$GIN_CONFIG/$1" ]; then

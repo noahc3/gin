@@ -43,7 +43,7 @@ if [[ "$1" == "meta" ]]; then
     # link bin/gin* binaries to /usr/local/bin
     if [[ "$1" == "link" ]]; then
         for bin in "$GIN_BIN"/gin*; do
-            local bin_name=$(basename "$bin")
+            bin_name=$(basename "$bin")
             ln -sf "$bin" "/usr/local/bin/$bin_name"
         done
         exit 0
@@ -53,7 +53,7 @@ if [[ "$1" == "meta" ]]; then
     # remove gin binaries from /usr/local/bin
     if [[ "$1" == "unlink" ]]; then
         for bin in "$GIN_BIN"/*; do
-            local bin_name=$(basename "$bin")
+            bin_name=$(basename "$bin")
             rm -f "/usr/local/bin/$bin_name"
         done
         exit 0
@@ -63,7 +63,7 @@ if [[ "$1" == "meta" ]]; then
     # link additional gin wrappers to /usr/local/bin
     if [[ "$1" == "link-extra" ]]; then
         for bin in "$GIN_BIN"/wine*; do
-            local bin_name=$(basename "$bin")
+            bin_name=$(basename "$bin")
             ln -sf "$bin" "/usr/local/bin/$bin_name"
         done
         exit 0
@@ -73,7 +73,7 @@ if [[ "$1" == "meta" ]]; then
     # remove additional gin wrappers from /usr/local/bin
     if [[ "$1" == "unlink-extra" ]]; then
         for bin in "$GIN_BIN"/wine*; do
-            local bin_name=$(basename "$bin")
+            bin_name=$(basename "$bin")
             rm -f "/usr/local/bin/$bin_name"
         done
         exit 0
@@ -219,8 +219,8 @@ if [[ "$1" == "prefix" ]]; then
         
         shift
 
-        local skip_mono=""
-        local set_prefix=""
+        skip_mono=""
+        set_prefix=""
         
         while [[ $1 == --* ]]; do
             case "$1" in
@@ -244,8 +244,8 @@ if [[ "$1" == "prefix" ]]; then
             exit 1
         fi
 
-        local prefix_name="$1"
-        local runner_path="$(get_runner_path)"
+        prefix_name="$1"
+        runner_path="$(get_runner_path)"
 
         mkdir -p "$GIN_PREFIXES/$prefix_name"
         export WINEPREFIX="$GIN_PREFIXES/$prefix_name"
@@ -279,7 +279,7 @@ if [[ "$1" == "prefix" ]]; then
 
         shift
 
-        local prefix_path="$(get_prefix_path)"
+        prefix_path="$(get_prefix_path)"
         
         case "$1" in
             # gincfg prefix plonk dotnet10sdk
