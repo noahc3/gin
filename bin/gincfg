@@ -27,6 +27,10 @@ function install_runner() {
     popd
 }
 
+if [[ "$1" == "init" ]]; then
+    exit 0
+fi
+
 if [[ "$1" == "meta" ]]; then
     shift
 

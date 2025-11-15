@@ -45,7 +45,7 @@ function set_migration_level() {
 }
 
 if [ "$(get_migration_level)" -lt "$GIN_TARGET_MIGRATION_LEVEL" ]; then
-    if [ "$GIN_MIGRATION_LEVEL" = "0" ]; then
+    if [ "$GIN_MIGRATION_LEVEL" == "0" ]; then
         mkdir -p "$GIN_CONFIG"
         mkdir -p "$GIN_RUNNERS"
         mkdir -p "$GIN_PREFIXES"
