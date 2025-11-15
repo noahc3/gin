@@ -6,9 +6,7 @@ function install_runner() {
     local runner_url=$2
     local download_name=$(echo $runner_url | awk -F"/" '{print $NF}')
 
-    mkdir -p "$WINE_DIR/runners"
-
-    pushd "$WINE_DIR/runners"
+    pushd "$GIN_RUNNERS"
 
     wget $runner_url
 
