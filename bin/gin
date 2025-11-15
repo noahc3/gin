@@ -8,19 +8,12 @@ assert_valid_prefix_set
 RUNNER="$(get_runner_path)"
 PREFIX="$(get_prefix_path)"
 
-libs=$(printf '%s\n' $RUNNER/lib/wine/*/ \
-  | sed 's|/$||' \
-  | awk -F/ '{ print ($NF=="x86_64-unix")?0:1, $0 }' \
-  | sort -k1,1n -k2,2 \
-  | cut -d' ' -f2- \
-  | paste -sd:)
-
 export PATH="$RUNNER/bin:$PATH"
 export LD_LIBRARY_PATH="$RUNNER/lib:$LD_LIBRARY_PATH"
 export WINEDLLOVERRIDES="winemenubuilder.exe=d;${WINEDLLOVERRIDES}"
 export WINESERVER="$RUNNER/bin/wineserver"
 export WINELOADER="$RUNNER/bin/wine"
-export WINEDLLPATH="$libs:$RUNNER/lib/wine:$WINEDLLPATH"
+export WINEDLLPATH="$RUNNER/lib/wine:$WINEDLLPATH"
 export WINEPREFIX="$PREFIX"
 
 if [ -n "$GIN_DEBUG" ]; then
