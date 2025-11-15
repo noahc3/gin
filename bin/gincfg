@@ -123,14 +123,22 @@ if [[ "$1" == "runner" ]]; then
     # install a new runner
     # must be a link to a tar.gz, tar.xz, or zip file containing the prebuilt runner binaries
     if [[ "$1" == "install" ]]; then
-        if [ -z "$2" ] || [ -z "$3" ]; then
+        shift
+
+        if [[ "$2" == "--set" ]]; then
+            set_runner "$2"
+            shift
+        fi
+
+        if [ -z "$1" ] || [ -z "$2" ]; then
             echo "Usage: gincfg runner install [--set] <runner_name> <runner_url>"
             exit 1
         fi
 
-        install_runner "$2" "$3"
-        if [[ "$4" == "--set" ]]; then
-            set_runner "$2"
+        install_runner "$1" "$2"
+        
+        if [[ -n "$set_runner" ]]; then
+            set_runner "$1"
         fi
 
         exit 0
