@@ -315,6 +315,16 @@ if [[ "$1" == "prefix" ]]; then
                 rm NDP481-DevPack-ENU.exe
                 popd
                 ;;
+            # gincfg prefix plonk msbuild2015
+            # install MSBuild 2015 into the current prefix
+            "msbuild2015")
+                pushd "$GIN_STAGING"
+                wget "https://download.microsoft.com/download/e/e/d/eedf18a8-4aed-4ce0-bebe-70a83094fc5a/BuildTools_Full.exe"
+                gin wine BuildTools_Full.exe /Quiet /NoRestart
+                gin wineserver -w
+                rm BuildTools_Full.exe
+                popd
+                ;;
             # gincfg prefix plonk help
             # list available plonks
             "help" | "list" | "")
