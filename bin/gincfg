@@ -325,6 +325,16 @@ if [[ "$1" == "prefix" ]]; then
                 rm BuildTools_Full.exe
                 popd
                 ;;
+            # gincfg prefix plonk python313
+            # install Python 3.13 into the current prefix
+            "python313")
+                pushd "$GIN_STAGING"
+                wget "https://www.python.org/ftp/python/3.13.9/python-3.13.9-amd64.exe"
+                gin wine python-3.13.9-amd64.exe /quiet InstallAllUsers=1 PrependPath=1
+                gin wineserver -w
+                rm python-3.13.9-amd64.exe
+                popd
+                ;;
             # gincfg prefix plonk help
             # list available plonks
             "help" | "list" | "")
