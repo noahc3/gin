@@ -21,6 +21,7 @@ function install_runner() {
     fi
     
     mv ${orig_name} ${runner_name}
+    rm ${download_name}
     
     popd
 }
@@ -292,6 +293,14 @@ if [[ "$1" == "prefix" ]]; then
                 gin wine dotnet-sdk-10.0.100-win-x64.exe /install /quiet /norestart
                 gin wineserver -w
                 rm dotnet-sdk-10.0.100-win-x64.exe
+                popd
+                ;;
+            "ndp481")
+                pushd "$GIN_STAGING"
+                wget "https://download.microsoft.com/download/8/1/8/81877d8b-a9b2-4153-9ad2-63a6441d11dd/NDP481-DevPack-ENU.exe"
+                gin wine NDP481-DevPack-ENU.exe /install /quiet /norestart
+                gin wineserver -w
+                rm NDP481-DevPack-ENU.exe
                 popd
                 ;;
             "help" | "list" | "")
