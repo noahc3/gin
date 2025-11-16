@@ -290,6 +290,7 @@ if [[ "$1" == "prefix" ]]; then
                 pushd "$GIN_STAGING"
                 wget "https://builds.dotnet.microsoft.com/dotnet/Sdk/10.0.100/dotnet-sdk-10.0.100-win-x64.exe"
                 gin wine dotnet-sdk-10.0.100-win-x64.exe /install /quiet /norestart
+                gin wineserver -w
                 rm dotnet-sdk-10.0.100-win-x64.exe
                 popd
                 ;;
