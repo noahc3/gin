@@ -295,6 +295,18 @@ if [[ "$1" == "prefix" ]]; then
                 rm dotnet-sdk-10.0.100-win-x64.exe
                 popd
                 ;;
+            # gincfg prefix plonk ndp480
+            # install .NET Framework 4.8.0 Developer Pack into the current prefix
+            "ndp480")
+                pushd "$GIN_STAGING"
+                wget "https://download.microsoft.com/download/6/4/2/642ec242-448b-49a1-8371-5d9c202eaa46/NDP48-DevPack-ENU.exe"
+                gin wine NDP48-DevPack-ENU.exe /install /quiet /norestart
+                gin wineserver -w
+                rm NDP48-DevPack-ENU.exe
+                popd
+                ;;
+            # gincfg prefix plonk ndp481
+            # install .NET Framework 4.8.1 Developer Pack into the current prefix
             "ndp481")
                 pushd "$GIN_STAGING"
                 wget "https://download.microsoft.com/download/8/1/8/81877d8b-a9b2-4153-9ad2-63a6441d11dd/NDP481-DevPack-ENU.exe"
@@ -303,9 +315,13 @@ if [[ "$1" == "prefix" ]]; then
                 rm NDP481-DevPack-ENU.exe
                 popd
                 ;;
+            # gincfg prefix plonk help
+            # list available plonks
             "help" | "list" | "")
-                echo "Available plonks:"
-                echo "    dotnet10sdk    Install .NET 10 SDK into the current prefix"
+                echo "Available plonks for the current prefix:"
+                echo "    dotnet10sdk       Install .NET 10 SDK (dotnet CLI)"
+                echo "    ndp480            Install .NET Framework 4.8.0 Developer Pack"
+                echo "    ndp481            Install .NET Framework 4.8.1 Developer Pack"
                 ;;
             *)
                 echo "Unknown plonk: $1"
